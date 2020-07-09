@@ -432,7 +432,7 @@ ResourceAccessPolicies:
 2. Activateボタンを押下して、証明書を有効化する。
 3. Policyは、後にcertificateにアタッチするので不要。Doneボタンを押下。
 4. certificateのARNを控えておく。  
-   ![createCert](./img/certificateArn.PNG)  
+   ![createCert](./img/certArn.png)  
 
 ## 5. ミドルウェア設定  (<font color="red">Raspebrry Pi 端末上</font>)
 
@@ -563,10 +563,10 @@ ResourceAccessPolicies:
 |[ROOT_CA_PEM_HERE]|root.ca.pem|
 |[CLOUD_PEM_CRT_HERE]|サーバ証明書ファイル名. </br>ex) abcd1234-certificate.pem.crt|
 |[CLOUD_PEM_KEY_HERE]|秘密鍵ファイル名. </br>ex) afcf52c6b2-private.pem.key|
-|[THING_ARN_HERE]|Greengrass Core ARN </br>ex)arn:aws:iot:ap-northeast-1:<自身のAWSアカウント>:thing/this-is-my-smart-cooler_Core|
+|[THING_ARN_HERE]|Greengrass Core ARN </br>ex)arn:aws:iot:ap-northeast-1:<自身のAWSアカウント>:thing/smart-cooler_Core|
 |coreThing.iotHost|AWS IoT Endpoint __AWS IoT console -> Settings -> Custom endpoint__|
 |coreThing.ggHost|replace [AWS_REGION_HERE] リージョン名
-|runtime.cgroup.useSystemd|`[yes|no]` -> `yes`|
+|runtime.cgroup.useSystemd|yes|
 |||
 ```
 sudo vi /greengrass/config/config.json 
