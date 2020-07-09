@@ -1,0 +1,41 @@
+version: 0.2 
+phases: 
+  install: 
+    runtime-versions: 
+      python: 3.7
+  build: 
+    commands:
+      - cd authentication-function
+      - sam build
+      - cd ../detection-function
+      - sam build
+      - cd ../door-sensor-function
+      - sam build
+      - cd ../purchase-function
+      - sam build
+      - cd ../qr-reader-function
+      - sam build
+      - cd ../qr-monitoring-function
+      - sam build
+      - cd ../update-product-function
+      - sam build
+      - cd ../update-product-local-function
+      - sam build
+      - cd ../SmartCoolerScan
+      - sam build
+      - cd ../SmartCoolerCharge
+      - sam build
+      - cd ..
+      - sam package --output-template-file packaged.yaml --s3-bucket $S3_BUCKET --s3-prefix controller-app-build
+      - sam deploy --template-file packaged.yaml --stack-name $STACK_NAME --capabilities CAPABILITY_IAM --no-fail-on-empty-changeset --parameter-overrides GreengrassGroupName=$STACK_NAME GreengrassGroupId=$GG_GROUP_ID GreengrassCoreCertificateARN=$IOT_CERT_ID
+  post_build: 
+    commands: 
+      - GROUP_ID=`aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].Outputs[0].OutputValue' --output text`
+      - GROUP_VERSION_ID=`aws greengrass list-group-versions --group-id ${GROUP_ID} --query 'Versions[0].Version' --output json`
+      - GROUP_VERSION_ID=`echo $GROUP_VERSION_ID | sed 's/"//g'`
+      - aws greengrass create-deployment --group-id ${GROUP_ID} --group-version-id ${GROUP_VERSION_ID} --deployment-type NewDeployment
+artifacts:
+  type: zip
+  files:
+    - template.yaml
+    - packaged.yaml

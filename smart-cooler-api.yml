@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+
+  # #############################################################################
+  # # Defenition for API Gateway
+  # #############################################################################
+  AmazonPayApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: AmazonPayApi
+
+  # #############################################################################
+  # # API Gateway Resource
+  # #############################################################################
+  AmazonPayScanResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: AmazonPayApi
+      ParentId:
+        Fn::GetAtt:
+          - AmazonPayApi
+          - RootResourceId
+      PathPart: scan
+  
+  AmazonPayChargeResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: AmazonPayApi
+      ParentId:
+        Fn::GetAtt:
+          - AmazonPayApi
+          - RootResourceId
+      PathPart: charge
+
+  # #############################################################################
+  # # API Gateway Method
+  # #############################################################################
+  ScanMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Join
+              - "/"
+              - - !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path"
+                - "2015-03-31"
+                - "functions"
+                - !GetAtt AmazonPayScanFunction.Arn
+                - "invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+      RestApiId:
+        Ref: AmazonPayApi
+      ResourceId:
+        Ref: AmazonPayScanResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+
+  ChargeMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Join
+              - "/"
+              - - !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path"
+                - "2015-03-31"
+                - "functions"
+                - !GetAtt AmazonPayChargeFunction.Arn
+                - "invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+      RestApiId:
+        Ref: AmazonPayApi
+      ResourceId:
+        Ref: AmazonPayChargeResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+
+  # #############################################################################
+  # # API Gateway Deployment
+  # #############################################################################
+  DeploymentScan:
+    DependsOn: ScanMethod
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref AmazonPayApi
+      Description: My deployment
+      StageName: prod
+  
+  DeploymentCharge:
+    DependsOn: ChargeMethod
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref AmazonPayApi
+      Description: My deployment
+      StageName: prod
+
+  # #############################################################################
+  # # SAM for API Function
+  # #############################################################################
+  AmazonPayScanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: SmartCoolerScan/.aws-sam/build/SmartCoolerScan
+      Handler: index.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 15
+
+  AmazonPayChargeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: SmartCoolerCharge/.aws-sam/build/SmartCoolerCharge
+      Handler: index.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 15
+
+  # #############################################################################
+  # # Role for function
+  # #############################################################################
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+      - PolicyName: LambdaFunctionPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - iot:Connect
+            - iot:Publish
+            - iot:Subscribe
+            - iot:Receive
+            - iot:GetThingShadow
+            - iot:UpdateThingShadow
+            - iot:DeleteThingShadow
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - sagemaker:InvokeEndpoint
+            Resource: '*'
+            Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+
+Outputs:
+  AmazonPayApiScan:
+    Value:
+      Fn::Sub:
+      - https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/scan
+      - ServerlessRestApi:
+          Ref: AmazonPayApi
+    Export:
+      Name: AmazonPayApiScan
+      
+  AmazonPayApiCharge:
+    Value:
+      Fn::Sub:
+      - https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/charge
+      - ServerlessRestApi:
+          Ref: AmazonPayApi
+    Export:
+      Name: AmazonPayApiCharge

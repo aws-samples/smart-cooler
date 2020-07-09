@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  qr-reader-function
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  QRReaderFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: qr-reader-function
+      CodeUri: src/
+      Handler: qr_reader.reading_qr_run
+      Runtime: python3.7
+
+Outputs:
+ QRReaderFunction:
+    Description: "None"
+    Value: !GetAtt QRReaderFunction.Arn

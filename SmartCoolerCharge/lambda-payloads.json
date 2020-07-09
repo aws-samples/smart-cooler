@@ -1,0 +1,18 @@
+{
+    "SmartCoolerScan": {
+        "lambda": {
+            "sandbox": "false",
+            "scanData": "AZ0UKhrmatMeKdlfY6b"
+        }
+    },
+    "SmartCoolerCharge": {
+        "lambda": {
+            "sandbox": "true",
+            "chargePermissionId": "S03-2409658-2500115",
+            "amount": "100",
+            "merchantNote": "軽食",
+            "merchantStoerName": "ヨツバ",
+            "merchantOrderId": "test-0001"
+        }
+    }
+}

@@ -1,0 +1,235 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  # Bucket to store detected image files
+  DetectionImageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-object-detection-image"
+
+  DetectionSageMakerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+      Policies:
+        - PolicyName: DetectionSageMakerPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource: "*"
+                Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - sagemaker.amazonaws.com
+
+  # Object Detection model 
+  DetectionSageMakerModel:
+    Type: AWS::SageMaker::Model
+    Properties:
+      ExecutionRoleArn: !GetAtt DetectionSageMakerRole.Arn
+      PrimaryContainer:
+        ModelDataUrl: "https://smart-cooler.s3.amazonaws.com/detection-sagemaker-model.tar.gz"
+        Image: !Join [ "/", [ !FindInMap [ RegionMap, !Ref "AWS::Region", ECRHostname ], "object-detection:latest" ] ]
+  
+  # Object Detection Endpoint configuration 
+  DetectionSageMakerEndpointConfig:
+    Type: AWS::SageMaker::EndpointConfig
+    Properties:
+      ProductionVariants:  
+      - ModelName: !GetAtt DetectionSageMakerModel.ModelName
+        VariantName: AllTraffic
+        InitialInstanceCount: 1
+        InstanceType: ml.m5.large
+        InitialVariantWeight: 1
+
+  # Object Detection Endpoint  
+  DetectionSageMakerEndpoint:
+    Type: AWS::SageMaker::Endpoint
+    Properties:
+      EndpointConfigName: !GetAtt DetectionSageMakerEndpointConfig.EndpointConfigName
+  
+  # Endpoint parameter are stored in parameter store in SSM
+  DetectionSageMakerSSDEndpointParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "${AWS::StackName}-detection-sagemaker-ssd-endpoint"
+      Type: String
+      Value: !GetAtt DetectionSageMakerEndpoint.EndpointName
+  DetectionImageBucketParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "${AWS::StackName}-detection-image-bucket"
+      Type: String
+      Value:
+        Ref: DetectionImageBucket
+  DetectionObjectCategoriesParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "${AWS::StackName}-detection-object-categories"
+      Type: String
+      Value: "['Coca-Cola', 'Frappuccino', 'Pepsi', 'Pure Life']"
+  DetectionConfidenceThresholdSSDParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "${AWS::StackName}-detection-confidence-threshold-ssd"
+      Type: String
+      Value: 0.25
+  DetectionConfidenceThresholdIOUParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "${AWS::StackName}-detection-confidence-threshold-iou"
+      Type: String
+      Value: 0.10
+  DetectionSmallBoxFilterScoreParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "${AWS::StackName}-detection-small-box-filter-score"
+      Type: String
+      Value: 0.05
+
+  # Object Detection function api by SAM
+  DetectionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: detection-function/.aws-sam/build/DetectionFunction
+      Handler: run.detect
+      Runtime: python3.7
+      Timeout: 60
+      MemorySize: 3008
+      Role: 
+        Fn::GetAtt:
+          - LambdaFunctionRole
+          - Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /detect
+            Method: post
+      Environment:
+        Variables:
+          REGION_NAME:
+            Ref: AWS::Region
+          SAGEMAKER_SSD_ENDPOINT:
+            Fn::GetAtt: [ DetectionSageMakerSSDEndpointParameter, Value ]
+          OBJECT_CATEGORIES:
+            Fn::GetAtt: [ DetectionObjectCategoriesParameter, Value ]
+          IMAGE_S3_BUCKET:
+            Fn::GetAtt: [ DetectionImageBucketParameter, Value ]
+          CONFIDENCE_THRESHOLD_SSD:
+            Fn::GetAtt: [ DetectionConfidenceThresholdSSDParameter, Value ]
+          CONFIDENCE_THRESHOLD_IOU:
+            Fn::GetAtt: [ DetectionConfidenceThresholdIOUParameter, Value ]
+          SMALL_BOX_FILTER_SCORE:
+            Fn::GetAtt: [ DetectionSmallBoxFilterScoreParameter, Value ]
+
+  
+  # #############################################################################
+  # # Role for function
+  # #############################################################################
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+      - PolicyName: LambdaFunctionPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - iot:Connect
+            - iot:Publish
+            - iot:Subscribe
+            - iot:Receive
+            - iot:GetThingShadow
+            - iot:UpdateThingShadow
+            - iot:DeleteThingShadow
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - sagemaker:InvokeEndpoint
+            Resource: '*'
+            Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+
+
+Outputs:
+  DetectionApiEndpointUrl:
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/detect/
+    Export:
+      Name: DetectionApiEndpointUrl
+
+
+# Mapping information for image file for od
+Mappings: 
+  RegionMap: 
+    us-west-1:
+      ECRHostname: 632365934929.dkr.ecr.us-west-1.amazonaws.com?
+    us-west-2:
+      ECRHostname: 433757028032.dkr.ecr.us-west-2.amazonaws.com
+    us-east-1:
+      ECRHostname: 811284229777.dkr.ecr.us-east-1.amazonaws.com
+    us-east-2:
+      ECRHostname: 825641698319.dkr.ecr.us-east-2.amazonaws.com
+    us-gov-west-1:
+      ECRHostname: 226302683700.dkr.ecr.us-gov-west-1.amazonaws.com
+    ap-east-1:
+      ECRHostname: 286214385809.dkr.ecr.ap-east-1.amazonaws.com
+    ap-northeast-1:
+      ECRHostname: 501404015308.dkr.ecr.ap-northeast-1.amazonaws.com
+    ap-northeast-2:
+      ECRHostname: 306986355934.dkr.ecr.ap-northeast-2.amazonaws.com
+    ap-south-1:
+      ECRHostname: 991648021394.dkr.ecr.ap-south-1.amazonaws.com
+    ap-southeast-1:
+      ECRHostname: 475088953585.dkr.ecr.ap-southeast-1.amazonaws.com
+    ap-southeast-2:
+      ECRHostname: 544295431143.dkr.ecr.ap-southeast-2.amazonaws.com
+    ca-central-1:
+      ECRHostname: 469771592824.dkr.ecr.ca-central-1.amazonaws.com
+    eu-central-1:
+      ECRHostname: 813361260812.dkr.ecr.eu-central-1.amazonaws.com
+    eu-north-1:
+      ECRHostname: 669576153137.dkr.ecr.eu-north-1.amazonaws.com
+    eu-west-1:
+      ECRHostname: 685385470294.dkr.ecr.eu-west-1.amazonaws.com
+    eu-west-2:
+      ECRHostname: 644912444149.dkr.ecr.eu-west-2.amazonaws.com
+    eu-west-3:
+      ECRHostname: 749696950732.dkr.ecr.eu-west-3.amazonaws.com
+    sa-east-1:
+      ECRHostname: 855470959533.dkr.ecr.sa-east-1.amazonaws.com
+      

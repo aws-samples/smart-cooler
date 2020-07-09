@@ -1,0 +1,638 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Description: >-
+  Greengrass and configuration will be set for Smart Cooler
+
+Parameters:
+  GreengrassGroupName:
+    Description: Greengrass Group name
+    Type: String
+    Default: smart-cooler
+
+  GreengrassCoreCertificateARN:
+    Type: String
+  
+Resources:  
+  # Policy for Thing that is used for GG
+  GreengrassCoreThingPolicy:
+    Type: AWS::IoT::Policy
+    Properties: 
+      PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - iot:*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - greengrass:*
+            Resource: "*"
+      PolicyName: !Join ["_", [!Ref GreengrassGroupName, "Core", "Policy"] ]
+  
+  # Attaching Policy to Certificate
+  GreengrassCoreThingPolicyPrincipal:
+    Type: AWS::IoT::PolicyPrincipalAttachment
+    Properties: 
+      Principal: !Ref GreengrassCoreCertificateARN
+      PolicyName: !Ref GreengrassCoreThingPolicy
+
+  # Attaching Certificate to Thing
+  GreengrassCoreThingPrincipal:
+    Type: AWS::IoT::ThingPrincipalAttachment
+    Properties: 
+      Principal: !Ref GreengrassCoreCertificateARN
+      ThingName: !Ref GreengrassCoreThing
+
+# Creating GreenGrassGroup
+  GreengrassGroup:
+    Type: AWS::Greengrass::Group
+    Properties:
+      Name: !Join ["_", [!Ref GreengrassGroupName] ]
+      RoleArn: !GetAtt GreengrassResourceRole.Arn
+
+  # Setting latest version
+  GreengrassGroupVersion:
+    Type: AWS::Greengrass::GroupVersion
+    Properties:
+      GroupId: !GetAtt GreengrassGroup.Id
+      CoreDefinitionVersionArn: !Ref GreengrassCoreDefinitionVersion
+      FunctionDefinitionVersionArn: !Ref LambdaFunctionDefinitionVersion
+      SubscriptionDefinitionVersionArn: !Ref SubscriptionDefinitionVersion
+      LoggerDefinitionVersionArn: !Ref GreengrassLoggerDefinitionVersion
+      ResourceDefinitionVersionArn: !Ref GreengrassResourceDefinitionVersion
+
+  #############################################################################
+  # Greengrass Core section
+  #############################################################################
+  GreengrassCoreDefinition:
+    Type: AWS::Greengrass::CoreDefinition
+    Properties:
+      Name: !Join ["_", [!Ref GreengrassGroupName, "Core"] ]
+
+  GreengrassCoreDefinitionVersion:
+    Type: AWS::Greengrass::CoreDefinitionVersion
+    Properties:
+      CoreDefinitionId: !Ref GreengrassCoreDefinition
+      Cores:
+        - Id: !Ref GreengrassCoreThing
+          ThingArn: !Join
+                      - ":"
+                      - - "arn:aws:iot"
+                        - !Ref AWS::Region
+                        - !Ref AWS::AccountId
+                        - !Join
+                          - "/"
+                          - - "thing"
+                            - !Ref GreengrassCoreThing
+          CertificateArn: !Ref GreengrassCoreCertificateARN
+          SyncShadow: false
+
+  #Things that is used for GG
+  GreengrassCoreThing:
+    Type: AWS::IoT::Thing
+    Properties: 
+      ThingName: !Join ["_", [!Ref GreengrassGroupName, "Core"] ]
+
+  #############################################################################
+  # Greengrass Logging section
+  #############################################################################
+  GreengrassLoggerDefinition:
+    Type: 'AWS::Greengrass::LoggerDefinition'
+    Properties:
+      Name: GreengrassLoggerDefinition
+      
+
+  GreengrassLoggerDefinitionVersion:
+    Type: 'AWS::Greengrass::LoggerDefinitionVersion'
+    Properties:
+      LoggerDefinitionId: !Ref GreengrassLoggerDefinition
+      Loggers:
+        - Id: SystemLogger
+          Type: FileSystem
+          Component: GreengrassSystem
+          Level: INFO
+          Space: 10000
+        - Id: LambdaLogger
+          Type: FileSystem
+          Component: Lambda
+          Level: DEBUG
+          Space: 10000
+
+  #############################################################################
+  # Greengrass resource section
+  #############################################################################
+  GreengrassResourceDefinition:
+    Type: AWS::Greengrass::ResourceDefinition
+    Properties: 
+      Name: GreengrassResourceDefinition
+
+  GreengrassResourceDefinitionVersion:
+    Type: AWS::Greengrass::ResourceDefinitionVersion
+    Properties: 
+      ResourceDefinitionId: !Ref GreengrassResourceDefinition
+      Resources:
+      - Id: "tmp"
+        Name: "tmp"
+        ResourceDataContainer:
+          LocalVolumeResourceData:
+            SourcePath: "/tmp"
+            DestinationPath: "/tmp"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "smart-cooler"
+        Name: "smart-cooler"
+        ResourceDataContainer:
+          LocalVolumeResourceData:
+            SourcePath: "/smart-cooler"
+            DestinationPath: "/smart-cooler"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "video-qr"
+        Name: "video-qr"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/video-qr"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "video-ref1"
+        Name: "video-ref1"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/video-ref1"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "video-ref2"
+        Name: "video-ref2"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/video-ref2"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "gpiomem"
+        Name: "gpiomem"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/gpiomem"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "controlC0"
+        Name: "controlC0"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/controlC0"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "pcmC0D0p"
+        Name: "pcmC0D0p"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/pcmC0D0p"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "controlC1"
+        Name: "controlC1"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/controlC1"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "pcmC1D0p"
+        Name: "pcmC1D0p"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/pcmC1D0p"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "controlC2"
+        Name: "controlC2"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/controlC2"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "pcmC2D0p"
+        Name: "pcmC2D0p"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/pcmC2D0p"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "controlC3"
+        Name: "controlC3"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/controlC3"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "pcmC3D0p"
+        Name: "pcmC3D0p"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/pcmC3D0p"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "controlC4"
+        Name: "controlC4"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/controlC4"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "pcmC4D0p"
+        Name: "pcmC4D0p"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/snd/pcmC4D0p"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+      - Id: "keyboard"
+        Name: "keyboard"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            SourcePath: "/dev/input/event-ref"
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+
+  #############################################################################
+  # Greengrass Lambda section
+  #############################################################################
+  LambdaFunctionDefinition:
+    Type: 'AWS::Greengrass::FunctionDefinition'
+    Properties:
+      Name: LambdaFunctionDefinition
+
+  LambdaFunctionDefinitionVersion:
+    Type: AWS::Greengrass::FunctionDefinitionVersion
+    Properties:
+      DefaultConfig:
+        Execution:
+          IsolationMode: GreengrassContainer
+      FunctionDefinitionId: !Ref LambdaFunctionDefinition
+      Functions:
+        - Id: !Join ["_", [!Ref GreengrassGroupName, "DoorSensorFunction"] ]
+          FunctionArn: !Ref DoorSensorFunction.Alias
+          FunctionConfiguration:
+            Pinned: true
+            Executable: run.py
+            MemorySize: 20000
+            Timeout: 2000
+            EncodingType: json
+            Environment:
+              Variables:
+                STACK_NAME:
+                  Ref: "AWS::StackName"
+              ResourceAccessPolicies:
+                - Permission: "rw"
+                  ResourceId: "gpiomem"
+
+        - Id: !Join ["_", [!Ref GreengrassGroupName, "AuthenticateFunction"] ]
+          FunctionArn: !Ref AuthenticateFunction.Alias
+          FunctionConfiguration:
+            Pinned: false
+            Executable: run.py
+            MemorySize: 20000
+            Timeout: 2000
+            EncodingType: json
+            Environment:
+              Variables:
+                STACK_NAME:
+                  Ref: "AWS::StackName"
+                HOME:
+                  "/tmp/$USER"
+                AUDIO_CARD:
+                  "3"
+                AUDIO_DEVICE:
+                  "0"
+              ResourceAccessPolicies:
+                - Permission: "rw"
+                  ResourceId: "smart-cooler"
+                - Permission: "rw"
+                  ResourceId: "gpiomem"
+                - Permission: "rw"
+                  ResourceId: "controlC3"
+                - Permission: "rw"
+                  ResourceId: "pcmC3D0p"
+        - Id: !Join ["_", [!Ref GreengrassGroupName, "QRReaderFunction"] ]
+          FunctionArn: !Ref QRReaderFunction.Alias
+          FunctionConfiguration:
+            Pinned: true
+            Executable: run.py
+            MemorySize: 200000
+            Timeout: 2500
+            EncodingType: json
+            Environment:
+              Variables:
+                STACK_NAME:
+                  Ref: "AWS::StackName"
+                AMAZON_PAY_SCAN_API:
+                  Fn::ImportValue: AmazonPayApiScan
+                IS_SANDBOX:
+                  true
+                REFILL_QR:
+                  "123456789"
+                HOME:
+                  "/tmp/$USER"
+                AUDIO_CARD:
+                  "3"
+                AUDIO_DEVICE:
+                  "0"
+              ResourceAccessPolicies:
+                - Permission: "rw"
+                  ResourceId: "smart-cooler"
+                - Permission: "rw"
+                  ResourceId: "controlC3"
+                - Permission: "rw"
+                  ResourceId: "pcmC3D0p"
+        - Id: !Join ["_", [!Ref GreengrassGroupName, "PurchaseFunction"] ]
+          FunctionArn: !Ref PurchaseFunction.Alias
+          FunctionConfiguration:
+            Pinned: false
+            Executable: run.py
+            MemorySize: 800000
+            Timeout: 2000
+            EncodingType: json
+            Environment:
+              Variables:
+                STACK_NAME:
+                  Ref: "AWS::StackName"
+                HOME:
+                  "/tmp/$USER"
+                IS_SANDBOX:
+                  true
+                DETECTION_API_URL:
+                  Fn::ImportValue: DetectionApiEndpointUrl
+                COMPANY_NAME:
+                  Yotsuba
+                FOOD_CATEGORY:
+                  軽食
+                NUMBER_CAMERAS:
+                  2
+                AMAZON_PAY_CHARGE_API:
+                  Fn::ImportValue: AmazonPayApiCharge
+                AUDIO_CARD:
+                  "3"
+                AUDIO_DEVICE:
+                  "0"
+              ResourceAccessPolicies:
+                - Permission: "rw"
+                  ResourceId: "tmp"
+                - Permission: "rw"
+                  ResourceId: "smart-cooler"
+                - Permission: "rw"
+                  ResourceId: "video-ref1"
+                - Permission: "rw"
+                  ResourceId: "video-ref2"
+                - Permission: "rw"
+                  ResourceId: "gpiomem"
+                - Permission: "rw"
+                  ResourceId: "controlC3"
+                - Permission: "rw"
+                  ResourceId: "pcmC3D0p"
+
+
+        - Id: !Join ["_", [!Ref GreengrassGroupName, "UpdateProductFunction"] ]
+          FunctionArn: !Ref UpdateProductFunction.Alias
+          FunctionConfiguration:
+            Pinned: false
+            Executable: run.py
+            MemorySize: 20000
+            Timeout: 2000
+            EncodingType: json
+            Environment:
+              Variables:
+                STACK_NAME:
+                  Ref: "AWS::StackName"
+                PRODUCT_MASTER_UPDATE_API:
+                  Fn::Sub:
+                  - https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/product
+                  - ServerlessRestApi:
+                      Ref: ServerlessRestApi
+              ResourceAccessPolicies:
+                - Permission: "rw"
+                  ResourceId: "smart-cooler"
+
+        - Id: !Join ["_", [!Ref GreengrassGroupName, "QRMonitoringFunction"] ]
+          FunctionArn: !Ref QRMonitoringFunction.Alias
+          FunctionConfiguration:
+            Pinned: true
+            Executable: run.py
+            MemorySize: 20000
+            Timeout: 2000
+            EncodingType: json
+            Environment:
+              Variables:
+                STACK_NAME:
+                  Ref: "AWS::StackName"
+                DISPLAY:
+                  ":0.0"
+              ResourceAccessPolicies:
+                - Permission: "rw"
+                  ResourceId: "smart-cooler"
+                - Permission: "rw"
+                  ResourceId: "keyboard"
+
+  # #############################################################################
+  # # Defenition for SAM
+  # #############################################################################
+  DoorSensorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: door-sensor-function/.aws-sam/build/DoorSensorFunction
+      Handler: door_sensor.run_loop
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+
+  AuthenticateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: authentication-function/.aws-sam/build/AuthenticationFunction
+      Handler: authenticate.auth_run
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+
+  QRReaderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: qr-reader-function/.aws-sam/build/QRReaderFunction
+      Handler: qr_reader.reading_qr_run
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+  
+  PurchaseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: purchase-function/.aws-sam/build/PurchaseFunction
+      Handler: purchase.transaction
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+
+  UpdateProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: update-product-function/.aws-sam/build/UpdateProductFunction
+      Handler: update_product.update_master
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+
+  QRMonitoringFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: qr-monitoring-function/.aws-sam/build/QRMonitoringFunction
+      Handler: qr_monitor.listen_qr
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+
+  getProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: update-product-local-function/.aws-sam/build/getProductFunction
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Events:
+        getProduct:
+          Type: Api 
+          Properties:
+            Path: /product
+            Method: get
+      Role:
+        Fn::GetAtt:
+          - GreengrassResourceRole
+          - Arn
+  
+  smartCoolerProductTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName : this-is-my-smart-cooler-demo-product
+      AttributeDefinitions:
+        - AttributeName: product_name
+          AttributeType: S
+      KeySchema:
+        - AttributeName: product_name
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  #############################################################################
+  # Greengrass Subscription section
+  #############################################################################
+  SubscriptionDefinition:
+    Type: 'AWS::Greengrass::SubscriptionDefinition'
+    Properties:
+      Name: SubscriptionDefinition
+  
+  SubscriptionDefinitionVersion:
+    Type: AWS::Greengrass::SubscriptionDefinitionVersion
+    Properties:
+      SubscriptionDefinitionId: !Ref SubscriptionDefinition
+      Subscriptions:
+        - Id: qrreder_auth
+          Source: !Ref QRReaderFunction.Alias
+          Subject: "authenticate"
+          Target: !Ref AuthenticateFunction.Alias
+        - Id: refill_auth
+          Source: !Ref QRReaderFunction.Alias
+          Subject: "refill"
+          Target: !Ref AuthenticateFunction.Alias
+        - Id: auth_debug
+          Source: !Ref AuthenticateFunction.Alias
+          Subject: !Join ["/", [!Ref "AWS::StackName","debug"]]
+          Target: "cloud"
+        - Id: door_debug
+          Source: !Ref DoorSensorFunction.Alias
+          Subject: !Join ["/", [!Ref "AWS::StackName","debug"]]
+          Target: "cloud"
+        - Id: qrreder_debug
+          Source: !Ref QRReaderFunction.Alias
+          Subject: !Join ["/", [!Ref "AWS::StackName","debug"]]
+          Target: "cloud"
+        - Id: door_purchase
+          Source: !Ref DoorSensorFunction.Alias
+          Subject: !Join ["/", [!Ref "AWS::StackName","close"]]
+          Target: !Ref PurchaseFunction.Alias
+        - Id: purchase_debug
+          Source: !Ref PurchaseFunction.Alias
+          Subject: !Join ["/", [!Ref "AWS::StackName","debug"]]
+          Target: "cloud"
+        - Id: update_product
+          Source: "cloud"
+          Subject: "smartcooler/update/product"
+          Target: !Ref UpdateProductFunction.Alias
+
+  #############################################################################
+  # Greengrass Role
+  #############################################################################
+  GreengrassResourceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+        - PolicyName: LambdaFunctionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - iot:Connect
+                  - iot:Publish
+                  - iot:Subscribe
+                  - iot:Receive
+                  - iot:GetThingShadow
+                  - iot:UpdateThingShadow
+                  - iot:DeleteThingShadow
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - dynamodb:Scan
+                Resource: 
+                  '*'
+                Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+Outputs:
+  GreengrassGroupId:
+    Value:
+      !GetAtt GreengrassGroup.Id

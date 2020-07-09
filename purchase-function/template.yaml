@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  purchase-function
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  PurchaseFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: purchase-function
+      CodeUri: src/
+      Handler: purchase.purchase_handler
+      Runtime: python3.7
+
+Outputs:
+ PurchaseFunction:
+    Description: "None"
+    Value: !GetAtt PurchaseFunction.Arn

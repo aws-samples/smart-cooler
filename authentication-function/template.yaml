@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  authentication-function
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  AuthenticationFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: authentication-function
+      CodeUri: src/
+      Handler: authenticate.authenticate
+      Runtime: python3.7
+
+Outputs:
+ AuthenticationFunction:
+    Description: "None"
+    Value: !GetAtt AuthenticationFunction.Arn

@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  qr-monitor-function
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  QRMonitoringFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: qr-monitor-function
+      CodeUri: src/
+      Handler: qr_monitor.listen_qr
+      Runtime: python3.7
+
+Outputs:
+ QRMonitoringFunction:
+    Description: "None"
+    Value: !GetAtt QRMonitoringFunction.Arn

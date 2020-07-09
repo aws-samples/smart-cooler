@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Detect function
+
+Resources:
+  DetectionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      CodeUri: src/
+      Handler: run.detect
+      Runtime: python3.7
+      Role: !GetAtt LambdaFunctionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /detect
+            Method: post
+
+Outputs:
+ DetectionFunction:
+    Description: "None"
+    Value: !GetAtt DetectionFunction.Arn

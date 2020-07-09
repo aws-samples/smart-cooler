@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  door-sensor-function
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  DoorSensorFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: door-sensor-function
+      CodeUri: src/
+      Handler: door_sensor.run_loop
+      Runtime: python3.7
+
+Outputs:
+ DoorSensorFunction:
+    Description: "None"
+    Value: !GetAtt DoorSensorFunction.Arn

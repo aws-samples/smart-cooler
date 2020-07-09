@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  update-product-function
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  UpdateProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: live
+      FunctionName: update-product-function
+      CodeUri: src/
+      Handler: update_product.update_master
+      Runtime: python3.7
+
+Outputs:
+ UpdateProductFunction:
+    Description: "None"
+    Value: !GetAtt UpdateProductFunction.Arn

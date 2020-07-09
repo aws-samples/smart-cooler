@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  update-product-function
+
+  Sample SAM Template for update-product-function
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  getProductFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: get-product-function
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+      Events:
+        getProduct:
+          Type: Api 
+          Properties:
+            Path: /product
+            Method: get
+
+  smartCoolerProductTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName : this-is-my-smart-cooler-demo-product
+      AttributeDefinitions:
+        - AttributeName: product_name
+          AttributeType: S
+      KeySchema:
+        - AttributeName: product_name
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
