@@ -439,7 +439,6 @@ ResourceAccessPolicies:
 1. Raspeberry Pi のソフトウェアを更新  (10分程かかる) 
     ```
     sudo apt update
-    sudo apt upgrade
     ```
 2. 画像処理に使用するopencvをインストール
     ```
