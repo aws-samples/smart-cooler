@@ -285,7 +285,7 @@ Raspberry Piや機械式リレー基板は冷蔵庫裏のスペースに隠す�
 ---
 ## 3. デバイス設定
 1. USBポートにデバイス(USBカメラ、USBスピーカ)を接続  
-lsusbコマンドを実行して、端末がデバイスを認識していることを確認します。USBカメラ(Logitech, Inc. Webcam C270)を認識されていることを確認。
+lsusbコマンドを実行して、端末がデバイスを認識していることを確認。USBカメラ(Logitech, Inc. Webcam C270)を認識されていることを確認。
     ```
     pi@raspberrypi:/dev/v4l/by-path $ lsusb 
     Bus 001 Device 007: ID 0d8c:0014 C-Media Electronics, Inc. Audio Adapter (Unitek Y-247A)
