@@ -280,6 +280,7 @@ Resources:
             Timeout: 2000
             EncodingType: json
             Environment:
+              AccessSysfs: True
               Variables:
                 STACK_NAME:
                   Ref: "AWS::StackName"
@@ -296,6 +297,7 @@ Resources:
             Timeout: 2000
             EncodingType: json
             Environment:
+              AccessSysfs: True
               Variables:
                 STACK_NAME:
                   Ref: "AWS::StackName"
@@ -354,6 +356,7 @@ Resources:
             Timeout: 2000
             EncodingType: json
             Environment:
+              AccessSysfs: True
               Variables:
                 STACK_NAME:
                   Ref: "AWS::StackName"
