@@ -20,14 +20,17 @@
 |7	|<img src="https://images-na.ssl-images-amazon.com/images/I/612vUSBabbL._AC_SL1200_.jpg" width="200">	|DC電源	|照明とドアロックの電源	|¥3,000	|1	|¥3,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B07L3N37QG/ref=cm_sw_em_r_mt_dp_U_KtA4EbHH97CVV)	|電圧は12V、電流値は8A推奨	|
 |8	|<img src="https://images-na.ssl-images-amazon.com/images/I/61ksxqScBjL._AC_SL1100_.jpg" width="200">	|機械式リレー	|ドアロック制御	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B00JGFF0QO/ref=cm_sw_em_r_mt_dp_U_lcA4EbZMBGD3K)	|	|
 |9	|<img src="https://images-na.ssl-images-amazon.com/images/I/61uhGsAD0yL._AC_SL1100_.jpg" width="200">	|磁気センサ	|ドアの開閉検出	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B07FLWGS73/ref=cm_sw_em_r_mt_dp_U_8iA4Eb417EY06)	|	|
-|10	|	|板	|複数段のための仕切り	|¥3,000	|1	|¥3,000	|[はざいや](https://www.hazaiya.co.jp/estimate/board_simple.php)	|厚さ: 5mm x 幅: 408mm x 奥行き: 320mm	|
-|11	|<img src="https://images-na.ssl-images-amazon.com/images/I/81dKe5ronVL._SL1500_.jpg" width="200">	|強力両面テープ	|部品設置と固定	|¥500	|2	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/gp/product/B003CYDLS4/ref=ppx_yo_dt_b_asin_title_o08_s00?ie=UTF8&psc=1)	|	|
-|12	|<img src="https://images-na.ssl-images-amazon.com/images/I/51-2jmmgOnL.jpg" width="200">	|ビニールテープ	|配線固定	|¥100	|1	|¥100	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B004JM5SOS/ref=cm_sw_em_r_mt_dp_U_5CA4Eb7PQVD5Q)	|白	|
-|13	|<img src="https://images-na.ssl-images-amazon.com/images/I/51mRZPIdGyL._SL1000_.jpg" width="200">	|配線付きコネクタ	|配線作成	|¥1,000	|2	|¥2,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B07W5SBYMQ/ref=cm_sw_em_r_mt_dp_U_UQA4Eb736J34B)	|	|
-|14	|<img src="https://images-na.ssl-images-amazon.com/images/I/51rx807hsiL._AC_SL1000_.jpg" width="200">	|コネクタ	|配線作成	|¥1,000	|2	|¥2,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B01MD283AC/ref=cm_sw_em_r_mt_dp_U_mEA4EbR43DM9X)	|	|
-|15	|<img src="https://images-na.ssl-images-amazon.com/images/I/619jx8WEPBL._AC_SL1500_.jpg" width="200">	|圧着工具	|コンタクト圧着	|¥3,500	|1	|¥3,500	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B002AVVO7U/ref=cm_sw_em_r_mt_dp_U_iTA4EbE9RSENX)	|	|
-|16	|<img src="https://images-na.ssl-images-amazon.com/images/I/61Rj1Nup7WL._SL1192_.jpg" width="200">	|配線材	|電気配線	|¥500	|2	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/gp/product/B010SBSX4K/ref=ppx_yo_dt_b_asin_title_o01_s00?ie=UTF8&psc=1)	|	|
-|17	|<img src="https://images-na.ssl-images-amazon.com/images/I/51zCqHHa30L._AC_SL1000_.jpg" width="200">	|ワイヤーストリッパー	|配線材の被覆剥き	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B087BXPP6K/ref=cm_sw_em_r_mt_dp_U_bKA4Eb2XF6P2V)	|	|
+|10	|<img src="https://images-na.ssl-images-amazon.com/images/I/71e2op6eLtL._AC_SL1280_.jpg" width="200">	|USBスピーカー |音声出力	|¥3,000	|1	|¥3,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B083W1W6HJ)	|	|
+|10	|<img src="https://images-na.ssl-images-amazon.com/images/I/71ysg9mfPnL._SL1001_.jpg" width="200">	|ジャンパー線 |Raspberry Piとの配線	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B06Y48V9DL)	|	|
+|10	|	|板	|複数段のための仕切り |¥3,000	|1	|¥3,000	|[はざいや](https://www.hazaiya.co.jp/estimate/board_simple.php)	|厚さ: 5mm x 幅: 408mm x 奥行き: 320mm	|
+|11	|	|板	|電磁ロック用スペーサー	|¥2,000	|1	|¥2,000	|[はざいや](https://www.hazaiya.co.jp/estimate/board_simple.php)	|厚さ: 15mm x 幅: 75mm x 奥行き: 36mm	|
+|12	|<img src="https://images-na.ssl-images-amazon.com/images/I/81dKe5ronVL._SL1500_.jpg" width="200">	|強力両面テープ	|部品設置と固定	|¥500	|2	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/gp/product/B003CYDLS4/ref=ppx_yo_dt_b_asin_title_o08_s00?ie=UTF8&psc=1)	|	|
+|13	|<img src="https://images-na.ssl-images-amazon.com/images/I/51-2jmmgOnL.jpg" width="200">	|ビニールテープ	|配線固定	|¥100	|1	|¥100	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B004JM5SOS/ref=cm_sw_em_r_mt_dp_U_5CA4Eb7PQVD5Q)	|白	|
+|14	|<img src="https://images-na.ssl-images-amazon.com/images/I/51mRZPIdGyL._SL1000_.jpg" width="200">	|配線付きコネクタ	|配線作成	|¥1,000	|2	|¥2,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B07W5SBYMQ/ref=cm_sw_em_r_mt_dp_U_UQA4Eb736J34B)	|	|
+|15	|<img src="https://images-na.ssl-images-amazon.com/images/I/51rx807hsiL._AC_SL1000_.jpg" width="200">	|コネクタ	|配線作成	|¥1,000	|2	|¥2,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B01MD283AC/ref=cm_sw_em_r_mt_dp_U_mEA4EbR43DM9X)	|	|
+|16	|<img src="https://images-na.ssl-images-amazon.com/images/I/619jx8WEPBL._AC_SL1500_.jpg" width="200">	|圧着工具	|コンタクト圧着	|¥3,500	|1	|¥3,500	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B002AVVO7U/ref=cm_sw_em_r_mt_dp_U_iTA4EbE9RSENX)	|	|
+|17	|<img src="https://images-na.ssl-images-amazon.com/images/I/61Rj1Nup7WL._SL1192_.jpg" width="200">	|配線材	|電気配線	|¥500	|2	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/gp/product/B010SBSX4K/ref=ppx_yo_dt_b_asin_title_o01_s00?ie=UTF8&psc=1)	|	|
+|18	|<img src="https://images-na.ssl-images-amazon.com/images/I/51zCqHHa30L._AC_SL1000_.jpg" width="200">	|ワイヤーストリッパー	|配線材の被覆剥き	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B087BXPP6K/ref=cm_sw_em_r_mt_dp_U_bKA4Eb2XF6P2V)	|	|
 |18	|<img src="https://images-na.ssl-images-amazon.com/images/I/01kYctQGh6L.jpg" width="200">	|圧着スリーブ	|配線結合	|¥500	|2	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B002A5RM2M/ref=cm_sw_em_r_mt_dp_U_JNA4EbSB7A3MF)	|より線断面積: 0.3~1.65	|
 |19	|<img src="https://images-na.ssl-images-amazon.com/images/I/715GU1i3dUL._AC_SL1500_.jpg" width="200">	|ペンチ	|圧着スリーブの圧着	|¥500	|1	|¥500	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B006JZIEMQ/ref=cm_sw_em_r_mt_dp_U_rjC4Eb9KTVVB3)	|ラジオペンチではないもの	|
 |20	|<img src="https://images-na.ssl-images-amazon.com/images/I/6178RH3WzgL._AC_SL1000_.jpg" width="200">	|半田と半田ごて	|照明用配線の半田付け	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B07R9YV4DZ/ref=cm_sw_em_r_mt_dp_U_UxT4EbKDB3HQ9)	|数カ所しか半田付けしないため、少量で良い	|
@@ -35,7 +38,7 @@
 |22	|<img src="https://images-na.ssl-images-amazon.com/images/I/41iKXcxZgfL.jpg" width="200">	|デジタルマルチメータ	|電気回路のデバック作業	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B003272E48/ref=cm_sw_em_r_mt_dp_U_qvT4Eb26PBN30)	|導通確認機能があるものが望ましい	|
 |23	|<img src="https://images-na.ssl-images-amazon.com/images/I/61R2gPMR6ZL._AC_SL1000_.jpg" width="200">	|プラスドライバー	|多用途	|¥1,000	|1	|¥1,000	|[Amazon.co.jp](https://www.amazon.co.jp/dp/B0016VCJLU/ref=cm_sw_em_r_mt_dp_U_ilC4Eb471C7KT)	|	|
 |24	|	|対象商品	|今回物体認識の対象となる商品	|	|	|¥0	|	|[対象商品](###対象商品)	|
-|	|	|	|	|	|概算金額	|¥109,100	|	|	|
+|	|	|	|	|	|概算金額	|¥118,100	|	|	|
 
 
 ## 冷蔵庫やカメラ、対象商品選定に関する考慮事項
