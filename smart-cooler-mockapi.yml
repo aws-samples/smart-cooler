@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # #############################################################################
+  # # Defenition for API Gateway
+  # #############################################################################
+  AmazonPayApiMock:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: Amazon Pay Mock
+      Name: AmazonPayApiMock
+      
+  # #############################################################################
+  # # API Gateway Resource
+  # #############################################################################
+  AmazonPayApiScanMockResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: AmazonPayApiMock
+      ParentId:
+        Fn::GetAtt:
+        - AmazonPayApiMock
+        - RootResourceId
+      PathPart: scan
+
+  AmazonPayApiChargeMockResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: AmazonPayApiMock
+      ParentId:
+        Fn::GetAtt:
+        - AmazonPayApiMock
+        - RootResourceId
+      PathPart: charge
+      
+  # #############################################################################
+  # # API Gateway Method
+  # #############################################################################
+  ApiScanMock:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: AmazonPayApiMock
+      ResourceId:
+        Ref: AmazonPayApiScanMockResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+            - StatusCode: 200
+              ResponseTemplates:
+                application/json : '{"chargePermissionId": "S12-1377753-4227366"}'
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+      - StatusCode: 200
+
+  ApiChargeMock:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: AmazonPayApiMock
+      ResourceId:
+        Ref: AmazonPayApiChargeMockResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+            - StatusCode: 200
+              ResponseTemplates:
+                application/json : '{"chargeId": "S03-8208779-0332333-C032865","chargeStatus": {"state": "Completed"}}'
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+      - StatusCode: 200
+
+  # #############################################################################
+  # # API Gateway Deployment
+  # #############################################################################
+  DeploymentScan:
+    DependsOn: ApiScanMock
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref AmazonPayApiMock
+      Description: dev deployment
+      StageName: dev
+      
+  DeploymentCharge:
+    DependsOn: ApiChargeMock
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref AmazonPayApiMock
+      Description: dev deployment
+      StageName: dev
+
+
+Outputs:
+  AmazonPayApiScan:
+    Value:
+      Fn::Sub:
+      - https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/scan
+      - ServerlessRestApi:
+          Ref: AmazonPayApiMock
+    Export:
+      Name: AmazonPayApiScan
+      
+  AmazonPayApiCharge:
+    Value:
+      Fn::Sub:
+      - https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/charge
+      - ServerlessRestApi:
+          Ref: AmazonPayApiMock
+    Export:
+      Name: AmazonPayApiCharge
